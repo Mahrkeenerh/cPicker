@@ -1,0 +1,10 @@
+# cPicker Dependencies
+
+# X11 screen capture
+python-xlib>=0.33
+
+# Image processing
+Pillow>=10.0.0
+
+# GUI framework
+PyQt6>=6.4.0
