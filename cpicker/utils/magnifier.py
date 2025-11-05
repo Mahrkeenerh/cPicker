@@ -71,13 +71,34 @@ class MagnifierWidget(QWidget):
                 QImage.Format.Format_RGB888
             )
 
-            # Scale up by zoom factor (nearest neighbor for sharp pixels)
-            self.magnified_pixmap = QPixmap.fromImage(qimage).scaled(
-                MAGNIFIER_SIZE,
-                MAGNIFIER_SIZE,
-                Qt.AspectRatioMode.KeepAspectRatio,
-                Qt.TransformationMode.FastTransformation
-            )
+            # Scale up by zoom factor using nearest neighbor for solid pixel blocks
+            # Note: FastTransformation is actually nearest-neighbor, but we need to ensure
+            # each source pixel becomes a solid 10x10 block
+            scaled_pixmap = QPixmap(MAGNIFIER_SIZE, MAGNIFIER_SIZE)
+            painter = QPainter(scaled_pixmap)
+            painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+            painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, False)
+
+            # Draw each source pixel as a solid 10x10 block
+            pixel_size = MAGNIFIER_SIZE // SOURCE_SIZE
+            for y in range(SOURCE_SIZE):
+                for x in range(SOURCE_SIZE):
+                    try:
+                        # Get pixel color from source image
+                        pixel_color = source_image.getpixel((x, y))
+                        color = QColor(*pixel_color)
+                        painter.fillRect(
+                            x * pixel_size,
+                            y * pixel_size,
+                            pixel_size,
+                            pixel_size,
+                            color
+                        )
+                    except Exception:
+                        pass
+
+            painter.end()
+            self.magnified_pixmap = scaled_pixmap
 
         self.update()
 
