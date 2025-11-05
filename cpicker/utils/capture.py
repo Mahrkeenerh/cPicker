@@ -42,9 +42,10 @@ class ScreenCapture:
             raw = self.root.get_image(x, y, width, height, X.ZPixmap, 0xffffffff)
 
             # Convert to PIL Image
-            # Format is usually BGRX (32-bit) or BGR (24-bit)
+            # X11 get_image always returns 4 bytes per pixel (BGRX) regardless of depth
+            # Using "BGR" for depth==24 causes stride mismatch and RGB decomposition
             if raw.depth == 24:
-                image = Image.frombytes("RGB", (width, height), raw.data, "raw", "BGR")
+                image = Image.frombytes("RGB", (width, height), raw.data, "raw", "BGRX")
             else:  # depth == 32
                 image = Image.frombytes("RGB", (width, height), raw.data, "raw", "BGRX")
 

@@ -210,13 +210,27 @@ class PickerOverlay(QWidget):
         success = copy_text_to_clipboard(self.current_hex)
 
         if success:
-            # Show notification using notify-send if available
+            # Show notification with color swatch using notify-send if available
             try:
                 import subprocess
+                import tempfile
+                from PIL import Image
+
+                # Create a color swatch image (48x48 pixels)
+                swatch_size = 48
+                swatch = Image.new('RGB', (swatch_size, swatch_size),
+                                   (self.current_r, self.current_g, self.current_b))
+
+                # Save to temporary file
+                with tempfile.NamedTemporaryFile(mode='w+b', suffix='.png', delete=False) as tmp:
+                    swatch.save(tmp, 'PNG')
+                    icon_path = tmp.name
+
+                # Show notification with color swatch as icon
                 subprocess.Popen(
                     [
                         'notify-send',
-                        '-i', 'color-select',
+                        '-i', icon_path,
                         '-t', '2000',
                         'Color Copied',
                         f'{self.current_hex}\nRGB({self.current_r}, {self.current_g}, {self.current_b})'
@@ -224,6 +238,21 @@ class PickerOverlay(QWidget):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL
                 )
+
+                # Clean up temporary file after a short delay
+                # (notification system needs time to load the icon)
+                import threading
+                def cleanup_icon():
+                    import time
+                    import os
+                    time.sleep(3)  # Wait for notification to load icon
+                    try:
+                        os.unlink(icon_path)
+                    except Exception:
+                        pass
+
+                threading.Thread(target=cleanup_icon, daemon=True).start()
+
             except Exception:
                 pass  # Notification is optional
 

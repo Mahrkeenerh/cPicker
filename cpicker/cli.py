@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QApplication
 
 from . import __version__
 from .picker_overlay import PickerOverlay
+from .utils.instance_lock import InstanceLock
 
 
 def main():
@@ -35,21 +36,23 @@ def main():
 
 def launch_picker():
     """Launch the color picker overlay."""
-    try:
-        # Create QApplication
-        app = QApplication(sys.argv)
-        app.setApplicationName("cPicker")
-        app.setOrganizationName("cPicker")
+    # Use instance lock to prevent multiple instances
+    with InstanceLock():
+        try:
+            # Create QApplication
+            app = QApplication(sys.argv)
+            app.setApplicationName("cPicker")
+            app.setOrganizationName("cPicker")
 
-        # Create and show picker overlay
-        picker = PickerOverlay()
+            # Create and show picker overlay
+            picker = PickerOverlay()
 
-        # Run application
-        sys.exit(app.exec())
+            # Run application
+            sys.exit(app.exec())
 
-    except Exception as e:
-        print(f"Error launching cPicker: {e}", file=sys.stderr)
-        sys.exit(1)
+        except Exception as e:
+            print(f"Error launching cPicker: {e}", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
