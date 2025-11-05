@@ -40,12 +40,13 @@ class MagnifierWidget(QWidget):
         self.setFixedSize(MAGNIFIER_SIZE, MAGNIFIER_SIZE + 80)  # Extra space for text
 
         # State
-        self.source_image: Optional[Image.Image] = None
-        self.magnified_pixmap: Optional[QPixmap] = None
+        self.source_pixmap: Optional[QPixmap] = None
         self.current_hex: str = "#000000"
         self.current_r: int = 0
         self.current_g: int = 0
         self.current_b: int = 0
+        self.cursor_x: int = 0
+        self.cursor_y: int = 0
 
         # Screen geometry
         self.screen_geometry = QApplication.primaryScreen().geometry()
@@ -57,9 +58,6 @@ class MagnifierWidget(QWidget):
         Args:
             source_image: PIL Image of 21×21 pixels to magnify
         """
-        self.source_image = source_image
-
-        # Convert PIL image to QPixmap and scale up
         if source_image:
             # Convert PIL RGB to QImage
             data = source_image.tobytes("raw", "RGB")
@@ -71,34 +69,8 @@ class MagnifierWidget(QWidget):
                 QImage.Format.Format_RGB888
             )
 
-            # Scale up by zoom factor using nearest neighbor for solid pixel blocks
-            # Note: FastTransformation is actually nearest-neighbor, but we need to ensure
-            # each source pixel becomes a solid 10x10 block
-            scaled_pixmap = QPixmap(MAGNIFIER_SIZE, MAGNIFIER_SIZE)
-            painter = QPainter(scaled_pixmap)
-            painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
-            painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, False)
-
-            # Draw each source pixel as a solid 10x10 block
-            pixel_size = MAGNIFIER_SIZE // SOURCE_SIZE
-            for y in range(SOURCE_SIZE):
-                for x in range(SOURCE_SIZE):
-                    try:
-                        # Get pixel color from source image
-                        pixel_color = source_image.getpixel((x, y))
-                        color = QColor(*pixel_color)
-                        painter.fillRect(
-                            x * pixel_size,
-                            y * pixel_size,
-                            pixel_size,
-                            pixel_size,
-                            color
-                        )
-                    except Exception:
-                        pass
-
-            painter.end()
-            self.magnified_pixmap = scaled_pixmap
+            # Convert to QPixmap (store source, not scaled version)
+            self.source_pixmap = QPixmap.fromImage(qimage)
 
         self.update()
 
@@ -146,15 +118,21 @@ class MagnifierWidget(QWidget):
     def paintEvent(self, event):
         """Paint the magnifier display."""
         painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        # Disable antialiasing for sharp pixel edges
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
 
         # Draw magnified view
-        if self.magnified_pixmap:
+        if self.source_pixmap:
             # Background
             painter.fillRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE, Qt.GlobalColor.black)
 
-            # Draw magnified pixels
-            painter.drawPixmap(0, 0, self.magnified_pixmap)
+            # Define source and target rectangles
+            source_rect = QRect(0, 0, SOURCE_SIZE, SOURCE_SIZE)
+            target_rect = QRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE)
+
+            # Draw the magnified image - Qt handles scaling efficiently
+            # This scales the 21×21 source to 210×210 without interpolation
+            painter.drawPixmap(target_rect, self.source_pixmap, source_rect)
 
             # Draw grid
             self._draw_grid(painter)
