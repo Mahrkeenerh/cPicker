@@ -118,8 +118,9 @@ class MagnifierWidget(QWidget):
     def paintEvent(self, event):
         """Paint the magnifier display."""
         painter = QPainter(self)
-        # Disable antialiasing for sharp pixel edges
+        # Disable antialiasing and smooth transform for sharp pixel edges
         painter.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, False)
 
         # Draw magnified view
         if self.source_pixmap:
@@ -131,7 +132,7 @@ class MagnifierWidget(QWidget):
             target_rect = QRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE)
 
             # Draw the magnified image - Qt handles scaling efficiently
-            # This scales the 21×21 source to 210×210 without interpolation
+            # With SmoothPixmapTransform disabled, uses nearest-neighbor (no interpolation)
             painter.drawPixmap(target_rect, self.source_pixmap, source_rect)
 
             # Draw grid
