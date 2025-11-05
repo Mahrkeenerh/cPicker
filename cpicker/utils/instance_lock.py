@@ -21,8 +21,8 @@ class InstanceLock:
         self.timestamp_file_path = Path("/tmp/cpicker.timestamp")
         self.lock_file = None
         self.lock_acquired = False
-        # Debounce period: prevent launches within 500ms of last instance
-        self.debounce_ms = 500
+        # Debounce period: prevent launches within 100ms of last instance
+        self.debounce_ms = 100
 
     def acquire(self) -> bool:
         """

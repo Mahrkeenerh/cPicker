@@ -69,8 +69,17 @@ class MagnifierWidget(QWidget):
                 QImage.Format.Format_RGB888
             )
 
-            # Convert to QPixmap (store source, not scaled version)
-            self.source_pixmap = QPixmap.fromImage(qimage)
+            # Convert to QPixmap
+            small_pixmap = QPixmap.fromImage(qimage)
+
+            # PRE-SCALE using FastTransformation (nearest-neighbor) BEFORE painting
+            # This avoids interpolation artifacts when drawPixmap does scaling
+            self.source_pixmap = small_pixmap.scaled(
+                MAGNIFIER_SIZE,
+                MAGNIFIER_SIZE,
+                Qt.AspectRatioMode.IgnoreAspectRatio,
+                Qt.TransformationMode.FastTransformation
+            )
 
         self.update()
 
@@ -127,13 +136,9 @@ class MagnifierWidget(QWidget):
             # Background
             painter.fillRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE, Qt.GlobalColor.black)
 
-            # Define source and target rectangles
-            source_rect = QRect(0, 0, SOURCE_SIZE, SOURCE_SIZE)
-            target_rect = QRect(0, 0, MAGNIFIER_SIZE, MAGNIFIER_SIZE)
-
-            # Draw the magnified image - Qt handles scaling efficiently
-            # With SmoothPixmapTransform disabled, uses nearest-neighbor (no interpolation)
-            painter.drawPixmap(target_rect, self.source_pixmap, source_rect)
+            # Draw the already-scaled pixmap (no scaling during draw = no interpolation)
+            # The pixmap is already 210×210, so this is a 1:1 copy
+            painter.drawPixmap(0, 0, self.source_pixmap)
 
             # Draw grid
             self._draw_grid(painter)
