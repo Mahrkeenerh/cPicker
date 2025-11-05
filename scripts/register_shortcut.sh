@@ -23,7 +23,7 @@ if [[ ! "$CUSTOM_LIST" =~ "cpicker" ]]; then
         NEW_LIST="['$KEY_PATH']"
     else
         # Append to existing list
-        NEW_LIST=$(echo "$CUSTOM_LIST" | sed "s/\]/, '$KEY_PATH']/")
+        NEW_LIST=$(echo "$CUSTOM_LIST" | sed "s|\]|, '$KEY_PATH']|")
     fi
 
     gsettings set $SCHEMA custom-keybindings "$NEW_LIST"

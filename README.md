@@ -6,12 +6,13 @@ A lightweight Linux color picker tool that lets you grab hex color codes from an
 
 ## Features
 
-- **Live Color Picking**: Press `Super+Shift+C` to activate, hover over any pixel to see its color
+- **Press-Hold-Release Workflow**: Press `Super+Shift+C` to activate, keep holding to keep active, release to copy
+- **Live Color Picking**: Hover over any pixel to see its color in real-time
 - **Magnified View**: 21×21 pixel area shown at 10x zoom with grid overlay
 - **Color Information**: Real-time display of hex code and RGB values
-- **Instant Copy**: Release key or click to copy hex code to clipboard
-- **Lightweight**: ~800 lines of clean Python code
-- **Fast**: Smooth 30 FPS magnifier updates
+- **Instant Copy**: Release shortcut keys or click to copy hex code to clipboard
+- **Lightweight**: ~650 lines of clean Python code
+- **Fast**: Smooth 30 FPS magnifier updates (only 441 pixels captured per frame)
 
 ## Screenshot
 
@@ -108,19 +109,22 @@ python3 -m cpicker
 
 ### Pick a Color
 
-1. **Activate**: Press `Super+Shift+C` or run `cpicker`
-2. **Navigate**: Move your cursor over the color you want
-3. **Pick**: Release the key, click left mouse button, or press any key to copy hex code
+1. **Activate**: Press and hold `Super+Shift+C` (or run `cpicker` from terminal)
+2. **Navigate**: While holding the keys, move your cursor over the color you want
+3. **Pick**: Release the shortcut keys (or click left mouse button) to copy hex code
 4. **Cancel**: Press `Escape` or right-click to exit without copying
 5. **Paste**: Use `Ctrl+V` to paste the hex code anywhere
+
+**Note**: The workflow is press-hold-release. Keep holding `Super+Shift+C` to keep the picker active, then release all keys to copy the color and close.
 
 ### Controls
 
 | Action | Result |
 |--------|--------|
-| `Super+Shift+C` | Launch color picker |
+| `Super+Shift+C` (press) | Launch color picker |
+| `Super+Shift+C` (hold) | Keep picker active |
+| `Super+Shift+C` (release) | Copy color and close |
 | Mouse move | Update magnifier position |
-| Key release | Copy color and close |
 | Left click | Copy color and close |
 | Right click | Cancel without copying |
 | `Escape` | Cancel without copying |
