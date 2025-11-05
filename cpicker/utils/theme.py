@@ -4,10 +4,12 @@ from PyQt6.QtGui import QColor
 
 
 # UI Colors (consistent with CaptiX theme)
-THEME_BLUE = QColor(0, 150, 255, 200)           # Highlights and center pixel border
+THEME_BLUE = QColor(0, 150, 255, 200)           # Highlights and borders
+THEME_BLUE_SOLID = QColor(0, 150, 255, 255)     # Solid blue for center pixel
 DARK_BG = QColor(40, 40, 40, 240)               # Dark background for info display
 WHITE_TEXT = QColor(255, 255, 255, 255)         # Text color
 SUBTLE_GRID = QColor(255, 255, 255, 60)         # Grid lines in magnifier
+SUBTLE_WHITE_GUIDE = QColor(255, 255, 255, 50)  # Crosshair guides
 
 
 # Magnifier constants

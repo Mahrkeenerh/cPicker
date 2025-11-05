@@ -8,7 +8,7 @@ from PIL import Image
 
 from .theme import (
     MAGNIFIER_SIZE, MAGNIFIER_OFFSET, ZOOM_FACTOR, SOURCE_SIZE,
-    THEME_BLUE, DARK_BG, WHITE_TEXT, SUBTLE_GRID,
+    THEME_BLUE, THEME_BLUE_SOLID, DARK_BG, WHITE_TEXT, SUBTLE_GRID, SUBTLE_WHITE_GUIDE,
     HEX_FONT_SIZE, RGB_FONT_SIZE, FONT_FAMILY
 )
 
@@ -169,21 +169,46 @@ class MagnifierWidget(QWidget):
             painter.drawLine(0, y, MAGNIFIER_SIZE, y)
 
     def _draw_center_highlight(self, painter: QPainter):
-        """Draw highlight around center pixel."""
-        pen = QPen(THEME_BLUE)
-        pen.setWidth(2)
-        pen.setStyle(Qt.PenStyle.DashLine)
-        painter.setPen(pen)
-
+        """Draw highlight around center pixel with crosshair guides."""
         # Center pixel is at index 10 (middle of 21×21 grid)
         pixel_size = MAGNIFIER_SIZE / SOURCE_SIZE
         center_index = SOURCE_SIZE // 2
 
-        x = int(center_index * pixel_size)
-        y = int(center_index * pixel_size)
-        size = int(pixel_size)
+        pixel_left = int(center_index * pixel_size)
+        pixel_top = int(center_index * pixel_size)
+        pixel_size_int = int(pixel_size)
 
-        painter.drawRect(x, y, size, size)
+        # Draw solid blue border around center pixel (pixel-perfect alignment)
+        highlight_pen = QPen(THEME_BLUE_SOLID, 2)
+        painter.setPen(highlight_pen)
+        # Draw with pixel-perfect alignment - one pixel larger to right and bottom
+        painter.drawRect(pixel_left, pixel_top, pixel_size_int + 1, pixel_size_int + 1)
+
+        # Draw crosshair guides (transparent interior, just edges)
+        edge_pen = QPen(SUBTLE_WHITE_GUIDE, 2)
+        painter.setPen(edge_pen)
+        painter.setBrush(Qt.BrushStyle.NoBrush)
+
+        # Vertical crosshair strip (covering full column height)
+        center_pixel_x = pixel_left + pixel_size_int // 2
+        strip_width = pixel_size_int + 1
+        vertical_rect = QRect(
+            center_pixel_x - strip_width // 2,
+            0,
+            strip_width,
+            MAGNIFIER_SIZE
+        )
+        painter.drawRect(vertical_rect)
+
+        # Horizontal crosshair strip (covering full row width)
+        center_pixel_y = pixel_top + pixel_size_int // 2
+        horizontal_rect = QRect(
+            0,
+            center_pixel_y - strip_width // 2,
+            MAGNIFIER_SIZE,
+            strip_width
+        )
+        painter.drawRect(horizontal_rect)
 
     def _draw_color_info(self, painter: QPainter):
         """Draw color information panel below magnifier."""
