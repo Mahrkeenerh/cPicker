@@ -152,13 +152,15 @@ class PickerOverlay(QWidget):
             shift_pressed = shift_l in pressed_keys or shift_r in pressed_keys
             c_pressed = c_key in pressed_keys
 
+            # All three keys must be pressed for combo to be active
             shortcut_combo_pressed = super_pressed and shift_pressed and c_pressed
 
             # Mark when we first detect the shortcut being held
             if shortcut_combo_pressed:
                 self.shortcut_keys_held = True
 
-            # When shortcut was held and now released, copy and close
+            # When shortcut was held and now ANY key is released, copy and close
+            # (shortcut_combo_pressed becomes False when ANY of the three keys is released)
             if self.shortcut_keys_held and not shortcut_combo_pressed:
                 self._copy_and_close()
 
