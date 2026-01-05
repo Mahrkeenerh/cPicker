@@ -79,9 +79,9 @@ class PickerOverlay(QWidget):
         self.activateWindow()
         self.setFocus()
 
-        # Initial position (center of screen)
-        self.cursor_x = screen.width() // 2
-        self.cursor_y = screen.height() // 2
+        # Initial position (center of screen in global coordinates)
+        self.cursor_x = screen.x() + screen.width() // 2
+        self.cursor_y = screen.y() + screen.height() // 2
 
     def mouseMoveEvent(self, event):
         """
@@ -90,8 +90,11 @@ class PickerOverlay(QWidget):
         Args:
             event: Mouse move event
         """
-        self.cursor_x = event.pos().x()
-        self.cursor_y = event.pos().y()
+        # Convert to global screen coordinates for accurate color capture
+        # event.pos() is relative to widget; X11 capture needs absolute screen coords
+        global_pos = self.mapToGlobal(event.pos())
+        self.cursor_x = global_pos.x()
+        self.cursor_y = global_pos.y()
 
     def _update_color(self):
         """Update color from current cursor position (called by timer)."""
