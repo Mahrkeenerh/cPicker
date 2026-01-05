@@ -3,13 +3,14 @@
 
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 echo "======================================"
 echo "  cPicker Installation"
 echo "======================================"
 echo ""
 
 # Directories
-INSTALL_DIR="${HOME}/.local/share/cpicker"
 BIN_DIR="${HOME}/.local/bin"
 
 # Check Python version
@@ -22,7 +23,7 @@ if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" 
     echo "Error: Python 3.10 or higher is required (found $PYTHON_VERSION)"
     exit 1
 fi
-echo "Python $PYTHON_VERSION detected ✓"
+echo "Python $PYTHON_VERSION detected"
 echo ""
 
 # Check for required system packages
@@ -38,34 +39,28 @@ if [ ${#MISSING_DEPS[@]} -gt 0 ]; then
     echo "Please install with: sudo apt install ${MISSING_DEPS[*]}"
     exit 1
 fi
-echo "System dependencies OK ✓"
+echo "System dependencies OK"
 echo ""
 
-# Create directories
-echo "Creating installation directories..."
-mkdir -p "$INSTALL_DIR"
-mkdir -p "$BIN_DIR"
-echo "Directories created ✓"
-echo ""
+# Create virtual environment if needed
+if [ ! -d "$SCRIPT_DIR/venv" ]; then
+    echo "Creating virtual environment..."
+    python3 -m venv "$SCRIPT_DIR/venv"
+fi
 
-# Copy files
-echo "Installing cPicker files..."
-cp -r cpicker "$INSTALL_DIR/"
-cp requirements.txt "$INSTALL_DIR/"
-echo "Files copied ✓"
-echo ""
-
-# Install Python dependencies
+# Install/update dependencies
 echo "Installing Python dependencies..."
-pip3 install --user -q -r "$INSTALL_DIR/requirements.txt"
-echo "Python dependencies installed ✓"
+"$SCRIPT_DIR/venv/bin/pip" install -q -r "$SCRIPT_DIR/requirements.txt"
+echo "Python dependencies installed"
 echo ""
 
-# Install wrapper script
+# Create bin directory if needed
+mkdir -p "$BIN_DIR"
+
+# Symlink launcher script
 echo "Installing launcher script..."
-cp cpicker_wrapper.sh "$BIN_DIR/cpicker"
-chmod +x "$BIN_DIR/cpicker"
-echo "Launcher installed to $BIN_DIR/cpicker ✓"
+ln -sf "$SCRIPT_DIR/cpicker_wrapper.sh" "$BIN_DIR/cpicker"
+echo "Launcher symlinked to $BIN_DIR/cpicker"
 echo ""
 
 # Check if ~/.local/bin is in PATH
@@ -81,7 +76,7 @@ echo "Would you like to register the Super+Shift+C keyboard shortcut? (y/n)"
 read -r REGISTER_SHORTCUT
 
 if [ "$REGISTER_SHORTCUT" = "y" ] || [ "$REGISTER_SHORTCUT" = "Y" ]; then
-    bash scripts/register_shortcut.sh
+    bash "$SCRIPT_DIR/scripts/register_shortcut.sh"
     echo ""
 fi
 
@@ -98,4 +93,6 @@ echo "  - Press Super+Shift+C anywhere to launch"
 echo "  - Move cursor to pick a color"
 echo "  - Release key or click to copy hex code"
 echo "  - Press Escape to cancel"
+echo ""
+echo "Repository: $SCRIPT_DIR"
 echo ""

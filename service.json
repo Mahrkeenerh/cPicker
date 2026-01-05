@@ -1,0 +1,25 @@
+{
+  "name": "cPicker",
+  "version": "1.0.0",
+  "description": "Lightweight Linux color picker for grabbing hex codes from any pixel",
+  "type": "application",
+
+  "systemd": null,
+
+  "network": {
+    "port": null,
+    "health": null
+  },
+
+  "paths": {
+    "config": null,
+    "logs": null,
+    "install": "install.sh",
+    "uninstall": "uninstall.sh"
+  },
+
+  "ui": {
+    "icon": "🎨",
+    "category": "Media"
+  }
+}

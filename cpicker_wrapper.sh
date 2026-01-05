@@ -1,18 +1,15 @@
 #!/bin/bash
 # cPicker wrapper script
-# This script is installed to ~/.local/bin/cpicker
+# This script is symlinked to ~/.local/bin/cpicker
 
-# Get the directory where this script is located
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Resolve symlink to find the actual repository directory
+SCRIPT_PATH="${BASH_SOURCE[0]}"
+while [ -L "$SCRIPT_PATH" ]; do
+    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+    SCRIPT_PATH="$(readlink "$SCRIPT_PATH")"
+    [[ $SCRIPT_PATH != /* ]] && SCRIPT_PATH="$SCRIPT_DIR/$SCRIPT_PATH"
+done
+REPO_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
 
-# Find the cPicker installation directory
-# If installed via install.sh, it will be in ~/.local/share/cpicker
-CPICKER_DIR="${HOME}/.local/share/cpicker"
-
-# If not found, try the script directory (development mode)
-if [ ! -d "$CPICKER_DIR" ]; then
-    CPICKER_DIR="$SCRIPT_DIR"
-fi
-
-# Launch cPicker
-cd "$CPICKER_DIR" && python3 -m cpicker "$@"
+# Launch cPicker using the virtual environment
+cd "$REPO_DIR" && "$REPO_DIR/venv/bin/python" -m cpicker "$@"
